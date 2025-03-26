@@ -190,6 +190,35 @@ async function deleteUser(request, response, next) {
     return next(error);
   }
 }
+async function loginUser(request, response, next) {
+  try {
+    const { email, password } = request.body;
+
+    // Validasi input
+    if (!email || !password) {
+      throw errorResponder(errorTypes.VALIDATION_ERROR, 'Email and password are required');
+    }
+
+    // Cek apakah user ada di database
+    const user = await usersService.getUserByEmail(email);
+    if (!user) {
+      throw errorResponder(errorTypes.UNAUTHORIZED, 'Invalid email or password');
+    }
+
+    // Cek password
+    const isPasswordValid = await passwordMatched(password, user.password);
+    if (!isPasswordValid) {
+      throw errorResponder(errorTypes.UNAUTHORIZED, 'Invalid email or password');
+    }
+
+    // Generate token JWT
+    const token = jwt.sign({ userId: user.id, email: user.email }, config.SECRET_KEY, { expiresIn: '1h' });
+
+    return response.status(200).json({ message: 'Login successful', token });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 module.exports = {
   getUsers,
@@ -198,4 +227,5 @@ module.exports = {
   updateUser,
   changePassword,
   deleteUser,
+  loginUser,
 };

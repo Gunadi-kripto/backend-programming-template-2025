@@ -24,6 +24,9 @@ async function updateUser(id, email, fullName) {
 async function deleteUser(id) {
   return usersRepository.deleteUser(id);
 }
+async function loginUser(email,password ) {
+  return usersRepository.loginUser(email, password)
+}
 
 module.exports = {
   getUsers,
@@ -32,4 +35,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  loginUser,
 };
